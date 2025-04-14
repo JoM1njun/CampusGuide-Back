@@ -26,15 +26,16 @@ app.get("/config", (req, res) => {
 // 정적 파일 제공 (예: HTML, JS, CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-const dbpw = process.env.DB_pw;
-
 // DB 연결 코드
 const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: dbpw,
-  database: "campus", // DB 이름
+  host: process.env.DB_host,
+  user: process.enc.DB_user,
+  password: process.env.DB_pw,
+  database: process.env.DB_name, // DB 이름
   port: 3306,
+  ssl: {
+    rejectUnauthorized: true,
+  },
 });
 
 // 검색 및 데이터 전달 API
