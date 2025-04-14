@@ -5,7 +5,7 @@ const cors = require("cors"); // CORS 모듈 불러오기
 const mysql = require("mysql2"); // mysql 모듈 불러오기
 const app = express(); // express 앱 생성
 const path = require('path');
-const port = 3000; // 서버 포트 번호 설정
+const port = process.env.DB_port;
 
 app.use(cors()); // CORS 설정
 app.use(express.json());
@@ -32,7 +32,6 @@ const db = mysql.createPool({
   user: process.enc.DB_user,
   password: process.env.DB_pw,
   database: process.env.DB_name, // DB 이름
-  port: 3306,
   ssl: {
     rejectUnauthorized: true,
   },
