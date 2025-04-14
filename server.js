@@ -230,5 +230,5 @@ app.get("/api/db-connect", (req, res) => {
 
 // 서버 실행
 app.listen(port, () => {
-  console.log(`서버가 http://localhost:${port}에서 실행되고 있습니다.`);
+  console.log(`서버가 https://campusguide-back.onrender.com:${port}에서 실행되고 있습니다.`);
 });
