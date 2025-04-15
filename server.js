@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // DB 연결 코드
 const db = mysql.createPool({
   host: process.env.DB_host,
-  user: process.enc.DB_user,
+  user: process.env.DB_user,
   password: process.env.DB_pw,
   database: process.env.DB_name, // DB 이름
   ssl: {
