@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 라우트에서 API 키 전달
-app.get("/config", (req, res) => {
+app.get("/api/kakao_key", (req, res) => {
   console.log("Received /config");
   const apikey = process.env.KAKAO_API_KEY;
   if (apikey) {
