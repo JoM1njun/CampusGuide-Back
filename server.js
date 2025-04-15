@@ -11,6 +11,7 @@ app.use(cors()); // CORS 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+console.log("API : ", process.env.KAKAO_API_KEY);
 // 라우트에서 API 키 전달
 app.get("/api/kakao_key", (req, res) => {
   console.log("Received /config");
