@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 });
 
 app.head("/", (req, res) => {
-  res.status(200).send("Server Living");
+  res.status(200).end();
 });
 
 // 정적 파일 제공 (예: HTML, JS, CSS)
