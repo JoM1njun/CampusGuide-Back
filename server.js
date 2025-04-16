@@ -11,6 +11,14 @@ app.use(cors()); // CORS 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 서버 실행 및 상태 출력(uptimeRobot)
+app.get("/", (req, res) => {
+  res.status(200).send("Server Living");
+});
+
+// 정적 파일 제공 (예: HTML, JS, CSS)
+app.use(express.static(path.join(__dirname, 'public')));
+
 // 라우트에서 API 키 전달
 // app.get("/api/kakao_key", (req, res) => {
 //   console.log("Received /config");
@@ -224,14 +232,6 @@ app.get("/api/db-connect", (req, res) => {
     });
   });
 });
-
-// 서버 실행 및 상태 출력(uptimeRobot)
-app.get("/", (req, res) => {
-  res.status(200).send("Server Living");
-});
-
-// 정적 파일 제공 (예: HTML, JS, CSS)
-app.use(express.static(path.join(__dirname, 'public')));
 
 // 서버 실행
 app.listen(port, () => {
