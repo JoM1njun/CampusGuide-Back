@@ -5,7 +5,7 @@ const cors = require("cors"); // CORS 모듈 불러오기
 const mysql = require("mysql2"); // mysql 모듈 불러오기
 const app = express(); // express 앱 생성
 const path = require('path');
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 app.use(cors()); // CORS 설정
 app.use(express.json());
