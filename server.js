@@ -23,9 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 //   }
 // });
 
-// 정적 파일 제공 (예: HTML, JS, CSS)
-app.use(express.static(path.join(__dirname, 'public')));
-
 // DB 연결 코드
 const db = mysql.createPool({
   host: process.env.DB_host,
@@ -233,6 +230,9 @@ app.get("/", (req, res) => {
   res.send("Server Living");
   res.status(200).end();
 });
+
+// 정적 파일 제공 (예: HTML, JS, CSS)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 서버 실행
 app.listen(port, () => {
