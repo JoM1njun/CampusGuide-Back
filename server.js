@@ -11,18 +11,17 @@ app.use(cors()); // CORS 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-console.log("API : ", process.env.KAKAO_API_KEY);
 // 라우트에서 API 키 전달
-app.get("/api/kakao_key", (req, res) => {
-  console.log("Received /config");
-  const apikey = process.env.KAKAO_API_KEY;
-  if (apikey) {
-    res.json({ apikey: apikey });
-    console.log("API : ", apikey);
-  } else {
-    res.status(500).json({error: 'API key not found'});
-  }
-});
+// app.get("/api/kakao_key", (req, res) => {
+//   console.log("Received /config");
+//   const apikey = process.env.KAKAO_API_KEY;
+//   if (apikey) {
+//     res.json({ apikey: apikey });
+//     console.log("API : ", apikey);
+//   } else {
+//     res.status(500).json({error: 'API key not found'});
+//   }
+// });
 
 // 정적 파일 제공 (예: HTML, JS, CSS)
 app.use(express.static(path.join(__dirname, 'public')));
