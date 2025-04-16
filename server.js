@@ -233,3 +233,9 @@ app.get("/api/db-connect", (req, res) => {
 app.listen(port, () => {
   console.log(`서버가 https://campusguide-back.onrender.com:${port}에서 실행되고 있습니다.`);
 });
+
+// 서버 실행 및 상태 출력(uptimeRobot)
+app.get("/", (req, res) => {
+  res.send("Server Living");
+  res.status(200).end();
+});
