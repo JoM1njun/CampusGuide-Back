@@ -16,6 +16,10 @@ app.get("/", (req, res) => {
   res.status(200).send("Server Living");
 });
 
+app.head("/", (req, res) => {
+  res.status(200).end();
+});
+
 // 정적 파일 제공 (예: HTML, JS, CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
