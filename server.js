@@ -227,8 +227,7 @@ app.get("/api/db-connect", (req, res) => {
 
 // 서버 실행 및 상태 출력(uptimeRobot)
 app.get("/", (req, res) => {
-  res.send("Server Living");
-  res.status(200).end();
+  res.status(200).send("Server Living");
 });
 
 // 정적 파일 제공 (예: HTML, JS, CSS)
