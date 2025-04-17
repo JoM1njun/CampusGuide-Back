@@ -7,6 +7,19 @@ const app = express(); // express 앱 생성
 const path = require('path');
 const port = process.env.PORT || 3000;
 const { Pool } = require('pg');
+const fs = require('fs');
+const data = require('./db'); // Render PostgreSQL 연결된 Pool
+
+app.post("/import-db", async (req, res) => {
+  try {
+    const sql = fs.readFileSync('C:/Users/brian/dumpv2.sql', 'utf8');
+    await data.query(sql);
+    res.json({ status: "success", message: "Data imported" });
+  } catch (err) {
+    console.error("Import error:", err);
+    res.status(500).json({ status: "error", message: "Failed to import" });
+  }
+});
 
 app.use(cors()); // CORS 설정
 app.use(express.json());
