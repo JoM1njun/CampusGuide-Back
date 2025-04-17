@@ -6,7 +6,7 @@ const fs = require('fs');  // 파일 시스템 모듈
 const { Pool } = require('pg');
 const app = express(); // express 앱 생성
 const path = require('path');
-const port = process.env.PORT || 3000;
+const server_port = process.env.PORT || 3000;
 
 app.use(cors()); // CORS 설정
 app.use(express.json());
@@ -202,20 +202,18 @@ app.get("/api/db-connect", async (req, res) => {
 console.log("Received POST /import-db");
 app.post("/import-db", async (req, res) => {
   try {
-    const sql = fs.readFileSync('dump.sql', 'utf8');
+    const sql = fs.readFileSync('C:/Users/brian/dumpv2.sql', 'utf8');
     console.log("Running SQL:", sql);  // 실행할 SQL 쿼리 확인
     
     await data.query(sql);  // 쿼리 실행
-    
     res.json({ status: "success", message: "Data imported" });
   } catch (err) {
-    console.error("Import error:", err);  // 에러 로그 확인
-    
+    console.error("Import error:", err.message);  // 에러 로그 확인
     res.status(500).json({ status: "error", message: "Failed to import" });
   }
 });
 
 // 서버 실행
-app.listen(port, () => {
-  console.log(`서버가 https://campusguide-back.onrender.com:${port}에서 실행되고 있습니다.`);
+app.listen(server_port, () => {
+  console.log(`서버가 https://campusguide-back.onrender.com:${server_port}에서 실행되고 있습니다.`);
 });
