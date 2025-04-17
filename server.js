@@ -199,6 +199,7 @@ app.get("/api/db-connect", async (req, res) => {
   }
 });
 
+console.log("Received POST /import-db");
 app.post("/import-db", async (req, res) => {
   try {
     const sql = fs.readFileSync('dump.sql', 'utf8');
