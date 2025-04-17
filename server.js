@@ -202,7 +202,7 @@ app.get("/api/db-connect", async (req, res) => {
 console.log("Received POST /import-db");
 app.post("/import-db", async (req, res) => {
   try {
-    const sql = fs.readFileSync('C:/Users/brian/dumpv2.sql', 'utf8');
+    const sql = fs.readFileSync('dumpv2.sql', 'utf8');
     console.log("Running SQL:", sql);  // 실행할 SQL 쿼리 확인
     
     await data.query(sql);  // 쿼리 실행
