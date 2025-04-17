@@ -14,5 +14,5 @@ app.post("/import-db", async (req, res) => {
 });
 
 app.listen(process.env.DB_port, () => {
-  console.log("Server is running on port ${process.env.DB_port}");
+  console.log(`Server is running on port ${process.env.DB_port}`);
 });
