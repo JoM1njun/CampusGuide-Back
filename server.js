@@ -37,6 +37,8 @@ const db = new Pool({
 });
 module.exports = db;
 
+console.log("Host : ", process.env.DB_host);
+
 // 검색 및 데이터 전달 API
 app.get("/api/db-status", async (req, res) => {
   const { query } = req.query;
