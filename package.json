@@ -4,7 +4,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mysql": "^2.18.1",
-    "mysql2": "^3.13.0"
+    "mysql2": "^3.13.0",
+    "pg": ^"8.14.1"
   },
   "name": "CampusGuide-back",
   "version": "1.0.0",
