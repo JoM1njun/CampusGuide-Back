@@ -6,6 +6,7 @@ const mysql = require("mysql2"); // mysql 모듈 불러오기
 const app = express(); // express 앱 생성
 const path = require('path');
 const port = process.env.PORT || 3000;
+const { Pool } = require('pg');
 
 app.use(cors()); // CORS 설정
 app.use(express.json());
@@ -23,37 +24,24 @@ app.head("/", (req, res) => {
 // 정적 파일 제공 (예: HTML, JS, CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 라우트에서 API 키 전달
-// app.get("/api/kakao_key", (req, res) => {
-//   console.log("Received /config");
-//   const apikey = process.env.KAKAO_API_KEY;
-//   if (apikey) {
-//     res.json({ apikey: apikey });
-//     console.log("API : ", apikey);
-//   } else {
-//     res.status(500).json({error: 'API key not found'});
-//   }
-// });
-
 // DB 연결 코드
-const db = mysql.createPool({
+const db = new Pool({
   host: process.env.DB_host,
   user: process.env.DB_user,
+  port: port,
   password: process.env.DB_pw,
   database: process.env.DB_name, // DB 이름
-  ssl: {
-    rejectUnauthorized: true,
-  },
 });
+module.exports = db;
 
 // 검색 및 데이터 전달 API
-app.get("/api/db-status", (req, res) => {
+app.get("/api/db-status", async (req, res) => {
   const { query } = req.query;
   console.log("Recieved : ", query);
 
   let sql = `
-        SELECT SQL_NO_CACHE *,
-        IFNULL(p.etc, '정보 없음') AS etc
+        SELECT *,
+        COALESCE(p.etc, '정보 없음') AS etc
         FROM place p
         LEFT JOIN floor f ON p.alias = f.p_id 
         LEFT JOIN room_number r ON f.f_id = r.f_id 
@@ -71,23 +59,18 @@ app.get("/api/db-status", (req, res) => {
   // p.name의 %?%로 인해 겹치는 이름이 표시됨 다시 손 볼것
   if (input) {
     const isEnglish = /^[a-zA-Z]+$/.test(input);
-    if (isEnglish) {
-      sql += `
+
+    sql += `
             AND (
-                p.name LIKE ? OR
-                p.type LIKE ? OR
-                LOWER(CONCAT(p.alias, r.num)) LIKE LOWER(?) OR
-                p.alias LIKE ?
+                p.name LIKE $1 OR
+                p.type LIKE $2 OR
+                LOWER(CONCAT(p.alias, r.num)) LIKE LOWER($3) OR
+                p.alias LIKE $4
             )`;
+
+    if (isEnglish) {
       params.push(`${input}`, `${input}`, `${input}`, `${input}`);
     } else {
-      sql += `
-            AND (
-                p.name LIKE ? OR
-                p.type LIKE ? OR
-                LOWER(CONCAT(p.alias, r.num)) LIKE LOWER(?) OR
-                p.alias LIKE ?
-            )`;
       params.push(`%${input}%`, `%${input}%`, `${input}`, `${input}`);
     }
   }
@@ -95,46 +78,26 @@ app.get("/api/db-status", (req, res) => {
   console.log("Executing SQL : ", sql, params);
 
   try {
-    db.query(sql, params, (err, result) => {
-      if (err) {
-        console.error("DB error : ", err);
-        return res.status(500).json({ error: err });
-      } else {
-        if (result.length > 0) {
-          const place = result;
-          console.log(
-            "Result : ",
-            result.map((r) => r.name)
-          );
-
-          return res.json({
-            places: result.map((place) => {
-              return {
-                name: place.name,
-                alias: place.alias,
-                latitude: place.lat,
-                longitude: place.lng,
-                etc: place.etc ? place.etc : "정보 없음",
-                
-              }
-            }),
-            rooms: result.map((room_number) =>{
-              return {
-                num: room_number.num,
-                etc: room_number ? room_number : "정보 없음",
-              }
-            }),
-          });
-        } else {
-          return res.status(404).json({ message: "Place Not Found" });
-        }
-      }
+    const result = await db.query(sql, params);
+    return res.json({
+      places: result.rows.map((place) => ({
+        name: place.name,
+        alias: place.alias,
+        latitude: place.lat,
+        longitude: place.lng,
+        etc: place.etc ? place.etc : "정보 없음",
+      })),
+      rooms: result.rows.map((room_number) => ({
+        num: room_number.num,
+        etc: room_number ? room_number : "정보 없음",
+      })),
     });
   } catch (e) {
     console.error("Unhandled error:", e);
     res.status(500).json({ error: e.toString() });
   }
 });
+
 
 // 장소 정보 전달 API
 app.get("/api/place-info", (req, res) => {
