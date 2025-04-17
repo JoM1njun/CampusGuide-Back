@@ -178,26 +178,20 @@ app.get("/api/bus-time", (req, res) => {
 
 
 // DB 연결 확인
-app.get("/api/db-connect", (req, res) => {
-  db.getConnection((err, connection) => {
-    if (err) {
-      console.log("Connect Failed", err);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Connect Failed" });
-    }
-
-    connection.ping((pingErr) => {
-      if (pingErr) {
-        console.log("Ping Failed", pingErr);
-        res.status(500).json({ status: "error", message: "Ping Failed" });
-      } else {
-        console.log("DB Connected");
-        res.json({ status: "success", message: "DB Connected" });
-      }
-      connection.release();
+app.get("/api/db-connect", async (req, res) => {
+  try {
+    // 간단한 쿼리로 연결 확인 (예: 현재 시간 가져오기)
+    const result = await db.query("SELECT NOW()");
+    console.log("DB Connected");
+    res.json({
+      status: "success",
+      message: "DB Connected",
+      time: result.rows[0].now,
     });
-  });
+  } catch (err) {
+    console.error("Connect Failed", err);
+    res.status(500).json({ status: "error", message: "Connect Failed" });
+  }
 });
 
 // 서버 실행
