@@ -28,9 +28,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 const db = new Pool({
   host: process.env.DB_host,
   user: process.env.DB_user,
-  port: port,
+  port: process.env.DB_port,
   password: process.env.DB_pw,
   database: process.env.DB_name, // DB 이름
+  ssl: {
+    rejectUnauthorized: false,  // SSL 인증서 문제를 해결하기 위한 설정
+  },
 });
 module.exports = db;
 
