@@ -91,6 +91,7 @@ app.get("/api/db-status", async (req, res) => {
         latitude: place.lat,
         longitude: place.lng,
         etc: place.etc ? place.etc : "정보 없음",
+        floor: place.floor,
       })),
       rooms: result.rows.map((room_number) => ({
         num: room_number.num,
