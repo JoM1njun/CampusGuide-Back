@@ -125,10 +125,6 @@ app.get("/api/place-info", async (req, res) => {
 
   try {
     const result = await db.query(sql, params);
-      // if (err) {
-      //   console.error("DB error : ", err);
-      //   return res.status(500).json({ error: err });
-      // } else {
       if (result.rows.length > 0) {
         return res.json({
           places: result.rows.map((place) => {
@@ -140,8 +136,8 @@ app.get("/api/place-info", async (req, res) => {
               latitude: place.lat,
               longitude: place.lng,
               etc: place.etc ? place.etc : "정보 없음",
-              floor: normalizeNewlines(place.floor_info),
-              major: normalizeNewlines(place.major_info),
+              floor: normalizeText(place.floor_info),
+              major: normalizeText(place.major_info),
             };
           }),
         });
