@@ -22,7 +22,6 @@ console.log("Place Major: ", place.major);
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("floor-info").innerHTML = normalizeText(place.floor);
     document.getElementById("major-info").innerHTML = normalizeText(place.major);
-  }
 });
 
 module.exports = normalizeText;
