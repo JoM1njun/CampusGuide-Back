@@ -104,57 +104,56 @@ app.get("/api/db-status", async (req, res) => {
 
 
 // 장소 정보 전달 API
-app.get("/api/place-info", (req, res) => {
+app.get("/api/place-info", async (req, res) => {
   const place = req.query.alias;
   console.log("Received alias : ", place);
 
   let sql = `
-        SELECT SQL_NO_CACHE *,
-        IFNULL(p.etc, '정보 없음') AS etc,
-        IFNULL(p.\`floor-info\`, '정보 없음') AS floor_info,
-        IFNULL(p.\`major-info\`, '정보 없음') AS major_info
+        SELECT *,
+        COALESCE(p.etc, '정보 없음') AS etc,
+        COALESCE(p.\`floor-info\`, '정보 없음') AS floor_info,
+        COALESCE(p.\`major-info\`, '정보 없음') AS major_info
         FROM place p
         WHERE 1=1
     `;
-    const params = [];
+  const params = [];
 
-    if (place) {
-      sql += ` AND p.alias LIKE ?`;
-      params.push(place);
-    }
+  if (place) {
+    sql += ` AND p.alias LIKE $1`;
+    params.push(place);
+  }
 
-    try {
-      db.query(sql, params, (err, result) => {
-        if (err) {
-          console.error("DB error : ", err);
-          return res.status(500).json({ error: err });
-        } else {
-          if (result.length > 0) {
-            return res.json({
-              places: result.map((place) => {
-                console.log("Etc : ", place.etc);
-                console.log("DB에서 가져온 floor-info: ", place.floor_info);
-                return {
-                  name: place.name,
-                  alias: place.alias,
-                  latitude: place.lat,
-                  longitude: place.lng,
-                  etc: place.etc ? place.etc : "정보 없음",
-                  floor: place.floor_info ? place.floor_info.replace(/\\n\s*\n/g, '\n') : "정보 없음",
-                  major: place.major_info ? place.major_info.replace(/\\n\s*\n/g, '\n') : "정보 없음",
-                };
-              }),
-            });
-          } else {
-            return res.status(404).json({ message: "Place Not Found" });
-          }
-        }
-      });
+  try {
+    const result = await db.query(sql, params);
+      // if (err) {
+      //   console.error("DB error : ", err);
+      //   return res.status(500).json({ error: err });
+      // } else {
+      if (result.rows.length > 0) {
+        return res.json({
+          places: result.rows.map((place) => {
+            console.log("Etc : ", place.etc);
+            console.log("DB에서 가져온 floor-info: ", place.floor_info);
+            return {
+              name: place.name,
+              alias: place.alias,
+              latitude: place.lat,
+              longitude: place.lng,
+              etc: place.etc ? place.etc : "정보 없음",
+              floor: place.floor_info ? place.floor_info.replace(/\\n\s*\n/g, "\n") : "정보 없음",
+              major: place.major_info ? place.major_info.replace(/\\n\s*\n/g, "\n") : "정보 없음",
+            };
+          }),
+        });
+      } else {
+        return res.status(404).json({ message: "Place Not Found" });
+      }
     } catch (e) {
-      console.error("Unhandled error:", e);
-      res.status(500).json({ error: e.toString() });
-    }
-})
+    console.error("Unhandled error:", e);
+    return res.status(500).json({ error: e.toString() });
+  }
+});
+
 
 // 버스 시간표 불러내는 api
 app.get("/api/bus-time", (req, res) => {
