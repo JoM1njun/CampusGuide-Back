@@ -108,6 +108,20 @@ app.get("/api/place-info", async (req, res) => {
   const place = req.query.alias;
   console.log("Received alias : ", place);
 
+  function normalizeNewlines(text) {
+  if (!text || text.trim() === "" || text === "(null)") {
+    return "정보 없음";
+  }
+    
+  // \\n → \n (문자열 줄바꿈 처리)
+  let fixed = text.replace(/\\n/g, "\n");
+
+  // \n이 여러 개 겹치는 경우 하나로 정리
+  fixed = fixed.replace(/\n{2,}/g, "\n");
+
+  return fixed;
+}
+
   let sql = `
         SELECT *,
         COALESCE(p.etc, '정보 없음') AS etc,
@@ -140,8 +154,8 @@ app.get("/api/place-info", async (req, res) => {
               latitude: place.lat,
               longitude: place.lng,
               etc: place.etc ? place.etc : "정보 없음",
-              floor: place.floor_info ? place.floor_info.replace(/\\n/g, "\n") : "정보 없음",
-              major: place.major_info ? place.major_info.replace(/\\n/g, "\n") : "정보 없음",
+              floor: normalizeNewlines(place.floor_info),
+              major: normalizeNewlines(place.major_info),
             };
           }),
         });
