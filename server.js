@@ -2,7 +2,6 @@ require('dotenv').config(); // .env 파일 불러오기
 
 const express = require("express"); // express 모듈 불러오기
 const cors = require("cors"); // CORS 모듈 불러오기
-const fs = require('fs');  // 파일 시스템 모듈
 const { Pool } = require('pg');
 const app = express(); // express 앱 생성
 const path = require('path');
@@ -199,19 +198,19 @@ app.get("/api/db-connect", async (req, res) => {
   }
 });
 
-console.log("Received POST /import-db");
-app.post("/import-db", async (req, res) => {
-  try {
-    const sql = fs.readFileSync('./dumpv2.sql', 'utf8');
-    console.log("Running SQL:", sql);  // 실행할 SQL 쿼리 확인
+// console.log("Received POST /import-db");
+// app.post("/import-db", async (req, res) => {
+//   try {
+//     const sql = fs.readFileSync('./dumpv2.sql', 'utf8');
+//     console.log("Running SQL:", sql);  // 실행할 SQL 쿼리 확인
     
-    await data.query(sql);  // 쿼리 실행
-    res.json({ status: "success", message: "Data imported" });
-  } catch (err) {
-    console.error("Import error:", err.message);  // 에러 로그 확인
-    res.status(500).json({ status: "error", message: "Failed to import" });
-  }
-});
+//     await data.query(sql);  // 쿼리 실행
+//     res.json({ status: "success", message: "Data imported" });
+//   } catch (err) {
+//     console.error("Import error:", err.message);  // 에러 로그 확인
+//     res.status(500).json({ status: "error", message: "Failed to import" });
+//   }
+// });
 
 // 서버 실행
 app.listen(server_port, () => {
