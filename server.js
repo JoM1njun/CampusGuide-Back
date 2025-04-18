@@ -114,12 +114,16 @@ app.get("/api/place-info", async (req, res) => {
   }
     
   // \\n → \n (문자열 줄바꿈 처리)
-  let fixed = text.replace(/\\n/g, "\n");
+  // let fixed = text.replace(/\\n/g, "\n");
 
-  // \n이 여러 개 겹치는 경우 하나로 정리
-  fixed = fixed.replace(/\n{2,}/g, "\n");
+  // // \n이 여러 개 겹치는 경우 하나로 정리
+  // fixed = fixed.replace(/\n{2,}/g, "\n");
 
-  return fixed;
+  // return fixed;
+  // 줄바꿈 및 중복 제거 통합 처리
+  return text
+    .replace(/\\n+/g, "\n")  // \n이 여러 번 연속되어도 한 번만 바꿈
+    .trim();                 // 앞뒤 공백 제거
 }
 
   let sql = `
