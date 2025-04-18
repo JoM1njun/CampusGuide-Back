@@ -47,7 +47,7 @@ app.get("/api/db-status", async (req, res) => {
   let sql = `
         SELECT *,
         COALESCE(p.etc, '정보 없음') AS etc
-        FROM place p
+        FROM place p, floor f
         LEFT JOIN floor f ON p.alias = f.p_id 
         LEFT JOIN room_number r ON f.f_id = r.f_id 
         LEFT JOIN category c ON p.category_id = c.c_id 
