@@ -156,7 +156,7 @@ app.get("/api/place-info", async (req, res) => {
 
 
 // 버스 시간표 불러내는 api
-app.get("/api/bus-time", (req, res) => {
+app.get("/api/bus-time", async (req, res) => {
   const stopId = req.query.station; // 프론트에서 정류장 ID를 넘겨줌
   console.log("Stop : ", stopId);
 
@@ -170,13 +170,13 @@ app.get("/api/bus-time", (req, res) => {
       ORDER BY departure_time;
   `;
 
-  db.query(sql, [stopId], (err, results) => {
-      if (err) {
-          console.error("DB error:", err);
-          return res.status(500).json({ error: err });
-      }
-      res.json({ timetable: results });
-  });
+  try {
+    const result = await db.query(sql, [stopId]);
+    res.json({ timetable: result.rows });
+  } catch (err) {
+    console.error("DB error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
