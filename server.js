@@ -111,8 +111,8 @@ app.get("/api/place-info", async (req, res) => {
   let sql = `
         SELECT *,
         COALESCE(p.etc, '정보 없음') AS etc,
-        COALESCE(p.\`floor-info\`, '정보 없음') AS floor_info,
-        COALESCE(p.\`major-info\`, '정보 없음') AS major_info
+        COALESCE(p."floor-info", '정보 없음') AS floor_info,
+        COALESCE(p."major-info", '정보 없음') AS major_info
         FROM place p
         WHERE 1=1
     `;
