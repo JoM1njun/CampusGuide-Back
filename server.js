@@ -140,8 +140,8 @@ app.get("/api/place-info", async (req, res) => {
               latitude: place.lat,
               longitude: place.lng,
               etc: place.etc ? place.etc : "정보 없음",
-              floor: place.floor_info ? place.floor_info.replace(/\\n\s*\n/g, "\n") : "정보 없음",
-              major: place.major_info ? place.major_info.replace(/\\n\s*\n/g, "\n") : "정보 없음",
+              floor: place.floor_info ? place.floor_info.replace(/\\n\s*\n/g, "\n").replace(/\\n/g, "\n") : "정보 없음",
+              major: place.major_info ? place.major_info.replace(/\\n\s*\n/g, "\n").replace(/\\n/g, "\n") : "정보 없음",
             };
           }),
         });
