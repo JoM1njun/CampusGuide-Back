@@ -166,7 +166,7 @@ app.get("/api/bus-time", async (req, res) => {
 
   let sql = `
       SELECT * FROM bus_time 
-      WHERE station = ? AND direction = '배재대학교 종점' 
+      WHERE station = $1 AND direction = '배재대학교 종점' 
       ORDER BY departure_time;
   `;
 
