@@ -13,12 +13,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 서버 실행 및 상태 출력(uptimeRobot)
-app.get("/", (req, res) => {
+app.get("/ping", (req, res) => {
   res.status(200).send("Server Living");
-});
-
-app.head("/", (req, res) => {
-  res.status(200).end();
 });
 
 // 정적 파일 제공 (예: HTML, JS, CSS)
