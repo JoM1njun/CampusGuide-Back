@@ -28,7 +28,7 @@ const db = new Pool({
   password: process.env.DB_pw,
   database: process.env.DB_name, // DB 이름
   ssl: {
-    rejectUnauthorized: false,  // SSL 인증서 문제를 해결하기 위한 설정
+    rejectUnauthorized: false // SSL 인증서 문제를 해결하기 위한 설정
   },
 });
 module.exports = db;
