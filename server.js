@@ -51,7 +51,7 @@ db.on('error', (err) => {
   // 여기에 재연결 로직을 추가할 수 있습니다.
   setTimeout(() => {
     console.log('Reconnecting to the database...');
-    client.connect();
+    db.connect();
   }, 3000);  // 3초 후 재연결 시도
 });
 
