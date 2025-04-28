@@ -43,9 +43,17 @@ db.connect()
   })
   .catch(err => {
     console.error('Neon DB 연결 실패:', err);
-    console.log('3초 후 다시 재연결 시도...');
-      setTimeout(dbConnect, 3000); // 3초 후 재연결 시도
   });
+
+// 오류 이벤트 핸들링 추가
+db.on('error', (err) => {
+  console.error('Database connection error:', err);
+  // 여기에 재연결 로직을 추가할 수 있습니다.
+  setTimeout(() => {
+    console.log('Reconnecting to the database...');
+    client.connect();
+  }, 3000);  // 3초 후 재연결 시도
+});
 
 console.log("Host : ", process.env.DB_host);
 
