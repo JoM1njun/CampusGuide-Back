@@ -43,6 +43,8 @@ db.connect()
   })
   .catch(err => {
     console.error('Neon DB 연결 실패:', err);
+    console.log('3초 후 다시 재연결 시도...');
+      setTimeout(dbConnect, 3000); // 3초 후 재연결 시도
   });
 
 console.log("Host : ", process.env.DB_host);
