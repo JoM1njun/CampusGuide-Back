@@ -2,7 +2,7 @@ require('dotenv').config(); // .env 파일 불러오기
 
 const express = require("express"); // express 모듈 불러오기
 const cors = require("cors"); // CORS 모듈 불러오기
-const { Pool } = require('pg');
+const { Client } = require('pg');
 const app = express(); // express 앱 생성
 const path = require('path');
 const normalizeText = require('./utils/normalizeText');
@@ -21,7 +21,7 @@ app.get("/ping", (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // DB 연결 코드
-const db = new Pool({
+const db = new Client({
   host: process.env.DB_host,
   user: process.env.DB_user,
   port: process.env.DB_port,
@@ -32,6 +32,18 @@ const db = new Pool({
   },
 });
 module.exports = db;
+
+client.connect()
+  .then(() => { 
+    console.log('Neon DB 연결 성공');
+    // 서버 실행
+    app.listen(server_port, () => {
+      console.log(`서버가 Neon Database:${server_port}에서 실행되고 있습니다.`);
+    });
+  })
+  .catch(err => {
+    console.error('Neon DB 연결 실패:', err);
+  });
 
 console.log("Host : ", process.env.DB_host);
 
@@ -204,8 +216,3 @@ app.get("/api/db-connect", async (req, res) => {
 //     res.status(500).json({ status: "error", message: "Failed to import" });
 //   }
 // });
-
-// 서버 실행
-app.listen(server_port, () => {
-  console.log(`서버가 Neon Database:${server_port}에서 실행되고 있습니다.`);
-});
