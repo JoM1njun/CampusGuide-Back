@@ -33,7 +33,7 @@ const db = new Client({
 });
 module.exports = db;
 
-client.connect()
+db.connect()
   .then(() => { 
     console.log('Neon DB 연결 성공');
     // 서버 실행
