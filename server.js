@@ -4,6 +4,7 @@ const express = require("express"); // express 모듈 불러오기
 const cors = require("cors"); // CORS 모듈 불러오기
 const { Client } = require('pg');
 const app = express(); // express 앱 생성
+const server = require('http').createServer(app);
 const path = require('path');
 const normalizeText = require('./utils/normalizeText');
 const server_port = process.env.PORT || 3000;
