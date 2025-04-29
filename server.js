@@ -8,6 +8,8 @@ const path = require('path');
 const normalizeText = require('./utils/normalizeText');
 const server_port = process.env.PORT || 3000;
 
+let db;
+
 app.use(cors()); // CORS 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,39 +23,72 @@ app.get("/ping", (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // DB 연결 코드
-const db = new Client({
-  host: process.env.DB_host,
-  user: process.env.DB_user,
-  port: process.env.DB_port,
-  password: process.env.DB_pw,
-  database: process.env.DB_name, // DB 이름
-  ssl: {
-    rejectUnauthorized: false // SSL 인증서 문제를 해결하기 위한 설정
-  },
-});
+function createClient() {
+  return new Client({
+    host: process.env.DB_host,
+    user: process.env.DB_user,
+    port: process.env.DB_port,
+    password: process.env.DB_pw,
+    database: process.env.DB_name, // DB 이름
+    ssl: {
+      rejectUnauthorized: false // SSL 인증서 문제를 해결하기 위한 설정
+    },
+  });
+}
+
+function connectDB() {
+  db = createClient();
+
+  db.connect()
+    .then(() => {
+      console.log('Neon DB 연결 성공');
+
+      // 서버는 최초 1번만 실행
+      if (!server.listening) {
+        server.listen(server_port, () => {
+          console.log(`서버가 포트 ${server_port}에서 실행되고 있습니다.`);
+        });
+      }
+    })
+    .catch(err => {
+      console.error('Neon DB 연결 실패:', err);
+      console.log('3초 후 재연결 시도...');
+      setTimeout(connectDB, 3000);
+    });
+
+  // 에러가 발생하면 새로 연결
+  db.on('error', (err) => {
+    console.error('DB 연결 오류 발생:', err);
+    console.log('3초 후 재연결 시도...');
+    setTimeout(connectDB, 3000);
+  });
+}
+
+connectDB();
+
 module.exports = db;
 
-db.connect()
-  .then(() => { 
-    console.log('Neon DB 연결 성공');
-    // 서버 실행
-    app.listen(server_port, () => {
-      console.log(`서버가 Neon Database:${server_port}에서 실행되고 있습니다.`);
-    });
-  })
-  .catch(err => {
-    console.error('Neon DB 연결 실패:', err);
-  });
+// db.connect()
+//   .then(() => { 
+//     console.log('Neon DB 연결 성공');
+//     // 서버 실행
+//     app.listen(server_port, () => {
+//       console.log(`서버가 Neon Database:${server_port}에서 실행되고 있습니다.`);
+//     });
+//   })
+//   .catch(err => {
+//     console.error('Neon DB 연결 실패:', err);
+//   });
 
-// 오류 이벤트 핸들링 추가
-db.on('error', (err) => {
-  console.error('Database connection error:', err);
-  // 여기에 재연결 로직을 추가할 수 있습니다.
-  setTimeout(() => {
-    console.log('Reconnecting to the database...');
-    db.connect();
-  }, 3000);  // 3초 후 재연결 시도
-});
+// // 오류 이벤트 핸들링 추가
+// db.on('error', (err) => {
+//   console.error('Database connection error:', err);
+//   // 여기에 재연결 로직을 추가할 수 있습니다.
+//   setTimeout(() => {
+//     console.log('Reconnecting to the database...');
+//     db.connect();
+//   }, 3000);  // 3초 후 재연결 시도
+// });
 
 console.log("Host : ", process.env.DB_host);
 
