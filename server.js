@@ -108,7 +108,7 @@ app.get("/api/db-status", async (req, res) => {
         alias: place.alias,
         latitude: place.lat,
         longitude: place.lng,
-        etc: place.etc ? place.etc : "정보 없음",
+        etc: normalizeText(place.etc),
         floor: place.floor,
       })),
       rooms: result.rows.map((room_number) => ({
