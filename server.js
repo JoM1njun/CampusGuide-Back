@@ -64,7 +64,7 @@ function connectDB() {
 
 connectDB();
 
-module.exports = db;
+module.exports = { db };
 
 // db.connect()
 //   .then(() => { 
