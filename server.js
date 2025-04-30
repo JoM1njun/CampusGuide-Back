@@ -15,9 +15,14 @@ app.use(cors()); // CORS 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 서버 실행 및 상태 출력(uptimeRobot)
+// 서버 실행 및 상태 출력(Google Apps Script)
 app.get("/ping", (req, res) => {
-  res.status(200).json({message: "Server Living" });
+  try {
+    await db.query("wake up");
+    res.status(200).json({message: "Server Living" });
+  } catch (err) {
+    res.status(500).json({ error: "DB error", detail: err.message });
+  }
 });
 
 // 정적 파일 제공 (예: HTML, JS, CSS)
