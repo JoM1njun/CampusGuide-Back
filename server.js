@@ -63,9 +63,9 @@ connectDB();
 module.exports = { db };
 
 // 서버 실행 및 상태 출력(Google Apps Script)
-app.get("/ping", (req, res) => {
+app.get("/ping", async (req, res) => {
   try {
-    await db.query("wake up");
+    await db.query("SELECT NOW()");
     res.status(200).json({message: "Server Living" });
   } catch (err) {
     res.status(500).json({ error: "DB error", detail: err.message });
