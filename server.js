@@ -18,6 +18,15 @@ app.use(express.urlencoded({ extended: true }));
 // 정적 파일 제공 (예: HTML, JS, CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 서버 실행 및 상태 출력(Google Apps Script)
+app.get("/ping", (req, res) => {
+  try {
+    res.status(200).json({message: "Server Living" });
+  } catch (err) {
+    res.status(500).json({ error: "DB error", detail: err.message });
+  }
+});
+
 // DB 연결 코드
 function createClient() {
   return new Client({
@@ -61,16 +70,6 @@ function connectDB() {
 connectDB();
 
 module.exports = { db };
-
-// 서버 실행 및 상태 출력(Google Apps Script)
-app.get("/ping", async (req, res) => {
-  try {
-    await db.query("SELECT NOW()");
-    res.status(200).json({message: "Server Living" });
-  } catch (err) {
-    res.status(500).json({ error: "DB error", detail: err.message });
-  }
-});
 
 // db.connect()
 //   .then(() => { 
