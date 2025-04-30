@@ -60,11 +60,11 @@ function connectDB() {
     });
 
   // 에러가 발생하면 새로 연결
-  db.on('error', (err) => {
-    console.error('DB 연결 오류 발생:', err);
-    console.log('3초 후 재연결 시도...');
-    setTimeout(connectDB, 3000);
-  });
+  // db.on('error', (err) => {
+  //   console.error('DB 연결 오류 발생:', err);
+  //   console.log('3초 후 재연결 시도...');
+  //   setTimeout(connectDB, 3000);
+  // });
 }
 
 connectDB();
