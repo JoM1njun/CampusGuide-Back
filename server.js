@@ -148,6 +148,9 @@ app.get("/api/db-status", async (req, res) => {
         longitude: place.lng,
         etc: normalizeText(place.etc),
         floor: place.floor,
+        hours: phone.hours,
+        phone: place.phone,
+        location: place.location,
       })),
       rooms: result.rows.map((room_number) => ({
         num: room_number.num,
