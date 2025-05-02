@@ -148,7 +148,7 @@ app.get("/api/db-status", async (req, res) => {
         longitude: place.lng,
         etc: normalizeText(place.etc),
         floor: place.floor,
-        hours: phone.hours,
+        hours: place.hours,
         phone: place.phone,
         location: place.location,
       })),
