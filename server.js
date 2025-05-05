@@ -130,6 +130,9 @@ app.get("/api/db-status", async (req, res) => {
 
   function escapeRegExp(query) {
     // 정규식 특수 문자들을 '\\'로 이스케이프 처리
+    if (typeof query !== "string") {
+      return "";
+    }
     return query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&");
   }
 
