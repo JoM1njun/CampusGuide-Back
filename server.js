@@ -32,7 +32,7 @@ app.listen(server_port, () => {
 });
 
 // DB 연결 코드
-async function queryDB(sql, params = []) {
+async function queryDB(sql, params = [], retry = 1) {
   const client = new Client({
     host: process.env.DB_host,
     user: process.env.DB_user,
@@ -48,6 +48,11 @@ async function queryDB(sql, params = []) {
     const result = await client.query(sql, params);
     return result;
   } catch (err) {
+    if (retry > 0) {
+      console.warn("DB 연결 실패, 재시도 중...");
+      await new Promise((res) => setTimeout(res, 2000)); // 2초 대기
+      return queryDB(sql, params, retry - 1); // 재귀 재시도
+    }
     throw err;
   } finally {
     await client.end();
