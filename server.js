@@ -203,7 +203,7 @@ app.get("/api/place-info", async (req, res) => {
   }
 
   try {
-    const result = await db.query(sql, params);
+    const result = await queryDB(sql, params);
       if (result.rows.length > 0) {
         return res.json({
           places: result.rows.map((place) => {
@@ -246,7 +246,7 @@ app.get("/api/bus-time", async (req, res) => {
   `;
 
   try {
-    const result = await db.query(sql, [stopId]);
+    const result = await queryDB(sql, [stopId]);
     res.json({ timetable: result.rows });
   } catch (err) {
     console.error("DB error:", err);
