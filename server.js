@@ -27,9 +27,13 @@ app.get("/ping", (req, res) => {
   }
 });
 
+app.listen(server_port, () => {
+  console.log(`서버가 PORT ${server_port}에서 실행되고 있습니다.`);
+});
+
 // DB 연결 코드
-function createClient() {
-  return new Client({
+async function queryDB(sql, params = []) {
+  const client = new Client({
     host: process.env.DB_host,
     user: process.env.DB_user,
     port: process.env.DB_port,
@@ -39,37 +43,46 @@ function createClient() {
       rejectUnauthorized: false // SSL 인증서 문제를 해결하기 위한 설정
     },
   });
+  try {
+    await client.connect();
+    const result = await client.query(sql, params);
+    return result;
+  } catch (err) {
+    throw err;
+  } finally {
+    await client.end();
+  }
 }
 
-function connectDB() {
-  db = createClient();
+// function connectDB() {
+//   db = createClient();
 
-  db.connect()
-    .then(() => {
-      console.log('Neon DB 연결 성공');
+//   db.connect()
+//     .then(() => {
+//       console.log('Neon DB 연결 성공');
 
-      // 서버는 최초 1번만 실행
-      if (!server.listening) {
-        server.listen(server_port, () => {
-          console.log(`서버가 포트 ${server_port}에서 실행되고 있습니다.`);
-        });
-      }
-    })
-    .catch(err => {
-      console.error('Neon DB 연결 실패:', err);
-    });
+//       // 서버는 최초 1번만 실행
+//       if (!server.listening) {
+//         server.listen(server_port, () => {
+//           console.log(`서버가 포트 ${server_port}에서 실행되고 있습니다.`);
+//         });
+//       }
+//     })
+//     .catch(err => {
+//       console.error('Neon DB 연결 실패:', err);
+//     });
 
-  // 에러가 발생하면 새로 연결
-  // db.on('error', (err) => {
-  //   console.error('DB 연결 오류 발생:', err);
-  //   console.log('3초 후 재연결 시도...');
-  //   setTimeout(connectDB, 3000);
-  // });
-}
+//   // 에러가 발생하면 새로 연결
+//   // db.on('error', (err) => {
+//   //   console.error('DB 연결 오류 발생:', err);
+//   //   console.log('3초 후 재연결 시도...');
+//   //   setTimeout(connectDB, 3000);
+//   // });
+// }
 
-connectDB();
+// connectDB();
 
-module.exports = { db };
+module.exports = { queryDB };
 
 // db.connect()
 //   .then(() => { 
@@ -139,7 +152,7 @@ app.get("/api/db-status", async (req, res) => {
   console.log("Executing SQL : ", sql, params);
 
   try {
-    const result = await db.query(sql, params);
+    const result = await queryDB(sql, params);
     return res.json({
       places: result.rows.map((place) => ({
         name: place.name,
