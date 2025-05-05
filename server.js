@@ -259,7 +259,7 @@ app.get("/api/bus-time", async (req, res) => {
 app.get("/api/db-connect", async (req, res) => {
   try {
     // 간단한 쿼리로 연결 확인 (예: 현재 시간 가져오기)
-    const result = await db.query("SELECT NOW()");
+    const result = await queryDB("SELECT NOW()");
     console.log("DB Connected");
     res.json({
       status: "success",
