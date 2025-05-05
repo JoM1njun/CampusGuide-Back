@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 서버 실행 및 상태 출력(Google Apps Script)
 app.get("/ping", (req, res) => {
   try {
-    res.status(200).json({message: "Server Living" });
+    res.status(200).json({status: "alive", message: "Server Living" });
   } catch (err) {
     res.status(500).json({ error: "DB error", detail: err.message });
   }
