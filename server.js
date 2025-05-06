@@ -147,7 +147,7 @@ app.get("/api/db-status", async (req, res) => {
                 p.name LIKE $1 OR
                 p.type LIKE $2 OR
                 LOWER(CONCAT(p.alias, r.num)) LIKE LOWER($3) OR
-                p.alias LIKE $4
+                LOWER(p.alias) LIKE LOWER($4)
             )`;
 
     if (isEnglish) {
