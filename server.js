@@ -141,20 +141,24 @@ app.get("/api/db-status", async (req, res) => {
   // p.name의 %?%로 인해 겹치는 이름이 표시됨 다시 손 볼것
   if (input) {
     const isEnglish = /^[a-zA-Z]+$/.test(input);
+    const korean = input.match(/[가-힣]+/g)?.join(" ") || "";
+    const english = input.match(/[a-zA-Z]+/g)?.join(" ") || "";
 
     sql += `
             AND (
                 LOWER(p.name) LIKE LOWER($1) OR
                 LOWER(p.type) LIKE LOWER($2) OR
-                LOWER(CONCAT(p.alias, r.num)) = LOWER($3) OR
-                LOWER(p.alias) = LOWER($4)
+                LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($3) OR 
+                LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($4) OR
+                LOWER(CONCAT(p.alias, r.num)) = LOWER($5) OR
+                LOWER(p.alias) = LOWER($6)
             )`;
 
-    if (isEnglish) {
-      params.push(`${input}%`, `${input}`, `${input}`, `${input}`);
-    } else {
-      params.push(`%${input}%`, `${input}`, `${input}`, `${input}`);
-    }
+    // if (isEnglish) {
+    //   params.push(`${input}%`, `${input}`, `%${korean}%`, `${input}`, `${input}`);
+    // } else {
+      params.push(`%${input}%`, `${input}`, `%${korean}%`, `${english}%`, `${input}`, `${input}`);
+    //}
   }
 
   console.log("Executing SQL : ", sql, params);
