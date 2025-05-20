@@ -1,12 +1,12 @@
-require('dotenv').config(); // .env 파일 불러오기
+require("dotenv").config(); // .env 파일 불러오기
 
 const express = require("express"); // express 모듈 불러오기
 const cors = require("cors"); // CORS 모듈 불러오기
-const { Client } = require('pg');
+const { Client } = require("pg");
 const app = express(); // express 앱 생성
-const server = require('http').createServer(app);
-const path = require('path');
-const normalizeText = require('./utils/normalizeText');
+const server = require("http").createServer(app);
+const path = require("path");
+const normalizeText = require("./utils/normalizeText");
 const server_port = process.env.PORT || 3000;
 
 let db;
@@ -16,12 +16,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 정적 파일 제공 (예: HTML, JS, CSS)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 // 서버 실행 및 상태 출력(Google Apps Script)
 app.get("/ping", (req, res) => {
   try {
-    res.status(200).json({status: "alive", message: "Server Living" });
+    res.status(200).json({ status: "alive", message: "Server Living" });
   } catch (err) {
     res.status(500).json({ error: "DB error", detail: err.message });
   }
@@ -40,7 +40,7 @@ async function queryDB(sql, params = [], retry = 1) {
     password: process.env.DB_pw,
     database: process.env.DB_name, // DB 이름
     ssl: {
-      rejectUnauthorized: false // SSL 인증서 문제를 해결하기 위한 설정
+      rejectUnauthorized: false, // SSL 인증서 문제를 해결하기 위한 설정
     },
   });
   try {
@@ -90,7 +90,7 @@ async function queryDB(sql, params = [], retry = 1) {
 module.exports = { queryDB };
 
 // db.connect()
-//   .then(() => { 
+//   .then(() => {
 //     console.log('Neon DB 연결 성공');
 //     // 서버 실행
 //     app.listen(server_port, () => {
@@ -143,56 +143,104 @@ app.get("/api/db-status", async (req, res) => {
     const isEnglish = /^[a-zA-Z]+$/.test(input);
     const korean = input.match(/[가-힣]+/g)?.join(" ") || "";
     const english = input.match(/[a-zA-Z]+/g)?.join(" ") || "";
-
-  //   sql += `
-  //           AND (
-  //               LOWER(p.name) LIKE LOWER($1) OR
-  //               LOWER(p.type) LIKE LOWER($2) OR
-  //               LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($3) OR 
-  //               LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($4) OR
-  //               LOWER(CONCAT(p.alias, r.num)) = LOWER($5) OR
-  //               LOWER(p.alias) = LOWER($6)
-  //           )`;
-
-  //   // if (isEnglish) {
-  //   //   params.push(`${input}%`, `${input}`, `%${korean}%`, `${input}`, `${input}`);
-  //   // } else {
-  //     params.push(`%${input}%`, `${input}`, `%${korean}%`, `${english}%`, `${input}`, `${input}`);
-  //   //}
-  // }
     const conditions = [];
     const values = [];
 
-    // 기본 name 검색
-    conditions.push(`LOWER(p.name) LIKE LOWER($${values.length + 1})`);
-    values.push(`%${input}%`);
+    //   sql += `
+    //           AND (
+    //               LOWER(p.name) LIKE LOWER($1) OR
+    //               LOWER(p.type) LIKE LOWER($2) OR
+    //               LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($3) OR
+    //               LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($4) OR
+    //               LOWER(CONCAT(p.alias, r.num)) = LOWER($5) OR
+    //               LOWER(p.alias) = LOWER($6)
+    //           )`;
 
-    // type 검색
-    conditions.push(`LOWER(p.type) LIKE LOWER($${values.length + 1})`);
-    values.push(`${input}`);
+    if (isEnglish) {
+      //params.push(`${input}%`, `${input}`, `%${korean}%`, `${input}`, `${input}`);
+      // 기본 name 검색
+      conditions.push(`LOWER(p.name) LIKE LOWER($${values.length + 1})`);
+      values.push(`${input}%`);
 
-    // 한글이 있을 때만 한글 추출 조건 추가
-    if (korean) {
-      conditions.push(`LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($${values.length + 1})`);
-      values.push(`%${korean}%`);
+      // type 검색
+      conditions.push(`LOWER(p.type) LIKE LOWER($${values.length + 1})`);
+      values.push(`${input}`);
+
+      // 한글이 있을 때만 한글 추출 조건 추가
+      if (korean) {
+        conditions.push(
+          `LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($${
+            values.length + 1
+          })`
+        );
+        values.push(`%${korean}%`);
+      }
+
+      // 영어가 있을 때만 영어 추출 조건 추가
+      if (english) {
+        conditions.push(
+          `LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($${
+            values.length + 1
+          })`
+        );
+        values.push(`${english}%`);
+      }
+
+      // 별칭 + 방번호 조합 검색
+      conditions.push(
+        `LOWER(CONCAT(p.alias, r.num)) = LOWER($${values.length + 1})`
+      );
+      values.push(input);
+
+      // 별칭 단독 검색
+      conditions.push(`LOWER(p.alias) = LOWER($${values.length + 1})`);
+      values.push(input);
+
+      sql += ` AND (${conditions.join(" OR ")})`;
+      params.push(...values);
+    } else {
+      //params.push(`%${input}%`, `${input}`, `%${korean}%`, `${english}%`, `${input}`, `${input}`);
+      // 기본 name 검색
+      conditions.push(`LOWER(p.name) LIKE LOWER($${values.length + 1})`);
+      values.push(`%${input}%`);
+
+      // type 검색
+      conditions.push(`LOWER(p.type) LIKE LOWER($${values.length + 1})`);
+      values.push(`${input}`);
+
+      // 한글이 있을 때만 한글 추출 조건 추가
+      if (korean) {
+        conditions.push(
+          `LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($${
+            values.length + 1
+          })`
+        );
+        values.push(`%${korean}%`);
+      }
+
+      // 영어가 있을 때만 영어 추출 조건 추가
+      if (english) {
+        conditions.push(
+          `LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($${
+            values.length + 1
+          })`
+        );
+        values.push(`${english}%`);
+      }
+
+      // 별칭 + 방번호 조합 검색
+      conditions.push(
+        `LOWER(CONCAT(p.alias, r.num)) = LOWER($${values.length + 1})`
+      );
+      values.push(input);
+
+      // 별칭 단독 검색
+      conditions.push(`LOWER(p.alias) = LOWER($${values.length + 1})`);
+      values.push(input);
+
+      sql += ` AND (${conditions.join(" OR ")})`;
+      params.push(...values);
     }
-
-    // 영어가 있을 때만 영어 추출 조건 추가
-    if (english) {
-      conditions.push(`LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($${values.length + 1})`);
-      values.push(`${english}%`);
-    }
-
-    // 별칭 + 방번호 조합 검색
-    conditions.push(`LOWER(CONCAT(p.alias, r.num)) = LOWER($${values.length + 1})`);
-    values.push(input);
-
-    // 별칭 단독 검색
-    conditions.push(`LOWER(p.alias) = LOWER($${values.length + 1})`);
-    values.push(input);
-
-    sql += ` AND (${conditions.join(" OR ")})`;
-    params.push(...values);
   }
 
   console.log("Executing SQL : ", sql, params);
@@ -222,7 +270,6 @@ app.get("/api/db-status", async (req, res) => {
   }
 });
 
-
 // 장소 정보 전달 API
 app.get("/api/place-info", async (req, res) => {
   const place = req.query.alias;
@@ -245,31 +292,30 @@ app.get("/api/place-info", async (req, res) => {
 
   try {
     const result = await queryDB(sql, params);
-      if (result.rows.length > 0) {
-        return res.json({
-          places: result.rows.map((place) => {
-            console.log("Etc : ", place.etc);
-            console.log("DB에서 가져온 floor-info: ", place.floor_info);
-            return {
-              name: place.name,
-              alias: place.alias,
-              latitude: place.lat,
-              longitude: place.lng,
-              etc: place.etc ? place.etc : "정보 없음",
-              floor: normalizeText(place.floor_info),
-              major: normalizeText(place.major_info),
-            };
-          }),
-        });
-      } else {
-        return res.status(404).json({ message: "Place Not Found" });
-      }
-    } catch (e) {
+    if (result.rows.length > 0) {
+      return res.json({
+        places: result.rows.map((place) => {
+          console.log("Etc : ", place.etc);
+          console.log("DB에서 가져온 floor-info: ", place.floor_info);
+          return {
+            name: place.name,
+            alias: place.alias,
+            latitude: place.lat,
+            longitude: place.lng,
+            etc: place.etc ? place.etc : "정보 없음",
+            floor: normalizeText(place.floor_info),
+            major: normalizeText(place.major_info),
+          };
+        }),
+      });
+    } else {
+      return res.status(404).json({ message: "Place Not Found" });
+    }
+  } catch (e) {
     console.error("Unhandled error:", e);
     return res.status(500).json({ error: e.toString() });
   }
 });
-
 
 // 버스 시간표 불러내는 api
 app.get("/api/bus-time", async (req, res) => {
@@ -277,7 +323,7 @@ app.get("/api/bus-time", async (req, res) => {
   console.log("Stop : ", stopId);
 
   if (!stopId) {
-      return res.status(400).json({ error: "정류장 ID가 필요합니다." });
+    return res.status(400).json({ error: "정류장 ID가 필요합니다." });
   }
 
   let sql = `
@@ -294,7 +340,6 @@ app.get("/api/bus-time", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // DB 연결 확인
 app.get("/api/db-connect", async (req, res) => {
@@ -318,7 +363,7 @@ app.get("/api/db-connect", async (req, res) => {
 //   try {
 //     const sql = fs.readFileSync('./dumpv2.sql', 'utf8');
 //     console.log("Running SQL:", sql);  // 실행할 SQL 쿼리 확인
-    
+
 //     await data.query(sql);  // 쿼리 실행
 //     res.json({ status: "success", message: "Data imported" });
 //   } catch (err) {
