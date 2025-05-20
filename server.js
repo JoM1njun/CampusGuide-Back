@@ -144,21 +144,55 @@ app.get("/api/db-status", async (req, res) => {
     const korean = input.match(/[가-힣]+/g)?.join(" ") || "";
     const english = input.match(/[a-zA-Z]+/g)?.join(" ") || "";
 
-    sql += `
-            AND (
-                LOWER(p.name) LIKE LOWER($1) OR
-                LOWER(p.type) LIKE LOWER($2) OR
-                LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($3) OR 
-                LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($4) OR
-                LOWER(CONCAT(p.alias, r.num)) = LOWER($5) OR
-                LOWER(p.alias) = LOWER($6)
-            )`;
+  //   sql += `
+  //           AND (
+  //               LOWER(p.name) LIKE LOWER($1) OR
+  //               LOWER(p.type) LIKE LOWER($2) OR
+  //               LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($3) OR 
+  //               LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($4) OR
+  //               LOWER(CONCAT(p.alias, r.num)) = LOWER($5) OR
+  //               LOWER(p.alias) = LOWER($6)
+  //           )`;
 
-    // if (isEnglish) {
-    //   params.push(`${input}%`, `${input}`, `%${korean}%`, `${input}`, `${input}`);
-    // } else {
-      params.push(`%${input}%`, `${input}`, `%${korean}%`, `${english}%`, `${input}`, `${input}`);
-    //}
+  //   // if (isEnglish) {
+  //   //   params.push(`${input}%`, `${input}`, `%${korean}%`, `${input}`, `${input}`);
+  //   // } else {
+  //     params.push(`%${input}%`, `${input}`, `%${korean}%`, `${english}%`, `${input}`, `${input}`);
+  //   //}
+  // }
+    const conditions = [];
+    const values = [];
+
+    // 기본 name 검색
+    conditions.push(`LOWER(p.name) LIKE LOWER($${values.length + 1})`);
+    values.push(`%${input}%`);
+
+    // type 검색
+    conditions.push(`LOWER(p.type) LIKE LOWER($${values.length + 1})`);
+    values.push(`${input}`);
+
+    // 한글이 있을 때만 한글 추출 조건 추가
+    if (korean) {
+      conditions.push(`LOWER(REGEXP_REPLACE(p.name, '[^가-힣]', '', 'g')) LIKE LOWER($${values.length + 1})`);
+      values.push(`%${korean}%`);
+    }
+
+    // 영어가 있을 때만 영어 추출 조건 추가
+    if (english) {
+      conditions.push(`LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z]', '', 'g')) LIKE LOWER($${values.length + 1})`);
+      values.push(`${english}%`);
+    }
+
+    // 별칭 + 방번호 조합 검색
+    conditions.push(`LOWER(CONCAT(p.alias, r.num)) = LOWER($${values.length + 1})`);
+    values.push(input);
+
+    // 별칭 단독 검색
+    conditions.push(`LOWER(p.alias) = LOWER($${values.length + 1})`);
+    values.push(input);
+
+    sql += ` AND (${conditions.join(" OR ")})`;
+    params.push(...values);
   }
 
   console.log("Executing SQL : ", sql, params);
