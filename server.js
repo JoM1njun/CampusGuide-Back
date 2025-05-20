@@ -150,11 +150,11 @@ app.get("/api/db-status", async (req, res) => {
                 LOWER(p.alias) = LOWER($4)
             )`;
 
-    // if (isEnglish) {
-    //   params.push(`%${input}`, `${input}`, `${input}`, `${input}`);
-    // } else {
+    if (isEnglish) {
+      params.push(`%${input}`, `${input}`, `${input}`, `${input}`);
+    } else {
       params.push(`%${input}%`, `${input}`, `${input}`, `${input}`);
-    //}
+    }
   }
 
   console.log("Executing SQL : ", sql, params);
