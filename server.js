@@ -153,7 +153,7 @@ app.get("/api/db-status", async (req, res) => {
     // if (isEnglish) {
     //   params.push(`%${input}`, `${input}`, `${input}`, `${input}`);
     // } else {
-      params.push(`%${input}%`, `%${input}%`, `${input}`, `${input}`);
+      params.push(`%${input}%`, `${input}`, `${input}`, `${input}`);
     //}
   }
 
